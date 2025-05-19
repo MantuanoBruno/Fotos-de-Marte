@@ -1,12 +1,13 @@
 package com.example.fotosdemarte.model
 
-import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.google.gson.annotations.SerializedName
 
-@InternalSerializationApi @Serializable
 data class MarsPhoto(
     val id: String,
-    @SerialName(value = "img_src")
+    @SerializedName("img_src")
     val imgSrc: String
+)
+
+data class MarsPhotoResponse(
+    val photos: List<MarsPhoto>
 )

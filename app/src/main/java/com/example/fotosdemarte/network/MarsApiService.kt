@@ -1,31 +1,26 @@
 package com.example.fotosdemarte.network
 
-import com.example.fotosdemarte.model.MarsPhoto
-import kotlinx.serialization.InternalSerializationApi
+import com.example.fotosdemarte.model.MarsPhotoResponse
 import retrofit2.Retrofit
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
+import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-
-
-private const val BASE_URL =
-    "https://android-kotlin-fun-mars-server.appspot.com"
-
-
-private val retrofit = Retrofit.Builder()
-    .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-    .baseUrl(BASE_URL)
-    .build()
+import retrofit2.http.Query
 
 interface MarsApiService {
-    @OptIn(InternalSerializationApi::class)
-    @GET("photos")
-    suspend fun getPhotos(): List<MarsPhoto>
+    @GET("rovers/curiosity/photos")
+    suspend fun getPhotos(
+        @Query("sol") sol: Int = 1000,
+        @Query("api_key") apiKey: String = "WINARhzMafyZYh55GW3w4LmenQTGD88dK0zeoFPQ"
+    ): MarsPhotoResponse
 }
 
 object MarsApi {
-    val retrofitService : MarsApiService by lazy {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://api.nasa.gov/mars-photos/api/v1/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val retrofitService: MarsApiService by lazy {
         retrofit.create(MarsApiService::class.java)
     }
 }

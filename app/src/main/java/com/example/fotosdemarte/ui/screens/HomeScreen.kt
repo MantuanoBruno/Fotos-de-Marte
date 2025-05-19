@@ -1,24 +1,23 @@
 package com.example.fotosdemarte.ui.screens
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.example.fotosdemarte.R
-import com.example.fotosdemarte.ui.theme.ThemeFotosDeMarte
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import com.example.fotosdemarte.model.MarsPhoto
 
 @Composable
 fun HomeScreen(
@@ -29,50 +28,95 @@ fun HomeScreen(
     when (marsUiState) {
         is MarsUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxSize())
         is MarsUiState.Success -> ResultScreen(
-            marsUiState.photos, modifier = modifier.fillMaxWidth()
+            photos = marsUiState.photos,
+            modifier = modifier
+                .fillMaxSize()
+                .padding(contentPadding)
         )
-
         is MarsUiState.Error -> ErrorScreen(modifier = modifier.fillMaxSize())
     }
 }
 
 @Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_connection_error), contentDescription = ""
+fun ResultScreen(
+    photos: List<MarsPhoto>,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        // DEBUG: mostra quantas fotos vieram
+        Text(
+            text = "Fotos encontradas: ${photos.size}",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
         )
-        Text(text = stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+
+        if (photos.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Nenhuma foto encontrada.")
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                items(photos) { photo ->
+                    Log.d("MARS_URL", photo.imgSrc)
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .padding(4.dp)
+                            .background(Color.DarkGray) // placeholder
+                    ) {
+                        AsyncImage(
+                            model = photo.imgSrc,
+                            contentDescription = "Mars photo ${photo.id}",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.matchParentSize()
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ErrorScreen(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = stringResource(R.string.loading_failed))
     }
 }
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
-    Image(
-        modifier = modifier.size(200.dp),
-        painter = painterResource(R.drawable.loading_img),
-        contentDescription = stringResource(R.string.loading)
-    )
-}
-
-@Composable
-fun ResultScreen(photos: String, modifier: Modifier = Modifier) {
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = photos)
+        Text(text = stringResource(R.string.loading))
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ResultScreenPreview() {
-    ThemeFotosDeMarte {
-        ResultScreen(stringResource(R.string.placeholder_result))
-    }
+    val samplePhotos = listOf(
+        MarsPhoto(id = "1", imgSrc = "https://via.placeholder.com/150"),
+        MarsPhoto(id = "2", imgSrc = "https://via.placeholder.com/150")
+    )
+    ResultScreen(
+        photos = samplePhotos,
+        modifier = Modifier.fillMaxSize()
+    )
 }
+
