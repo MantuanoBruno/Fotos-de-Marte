@@ -1,5 +1,6 @@
 package com.example.fotosdemarte.ui.screens
 
+import android.R.attr.onClick
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,10 +19,12 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.fotosdemarte.R
 import com.example.fotosdemarte.model.MarsPhoto
+import androidx.compose.material3.Button
 
 @Composable
 fun HomeScreen(
     marsUiState: MarsUiState,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
@@ -33,7 +36,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
         )
-        is MarsUiState.Error -> ErrorScreen(modifier = modifier.fillMaxSize())
+        is MarsUiState.Error -> ErrorScreen(onRetry = onRetry, modifier = modifier.fillMaxSize())
     }
 }
 
@@ -88,12 +91,18 @@ fun ResultScreen(
 }
 
 @Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
+fun ErrorScreen(
+    modifier: Modifier = Modifier,
+    onRetry: () -> Unit,
+) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Text(text = stringResource(R.string.loading_failed))
+        Button(onClick = onRetry) {
+            Text(stringResource(R.string.retry))
+        }
     }
 }
 
